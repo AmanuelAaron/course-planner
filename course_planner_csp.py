@@ -15,7 +15,18 @@ def course_planner_csp(courses, summer, years):
 	
 	course_planner_csp = CSP("course-planner", course_vars)
 	
-	# Add constraint if no summer courses allowed
+	# Add constraints for the total number of years
+	for var in course_vars:
+		cons = Constraint("Max Years in School", [var])
+		dom = cdat[var.name][2]
+		valid_vals = []
+		for element in dom:
+			if element[0][0] <= years * 3:
+				valid_vals.append((element,))
+		cons.add_satisfying_tuples(valid_vals)
+		course_planner_csp.add_constraint(cons)
+	
+	# Add constraints if no summer courses allowed
 	if not summer:
 		for var in course_vars:
 			cons = Constraint("No Summer", [var])
@@ -23,18 +34,22 @@ def course_planner_csp(courses, summer, years):
 			valid_vals = []
 			for element in dom:
 				if element[0][0] % 3 !=  0:
-					valid_vals.append(element)
-			print(valid_vals)
+					valid_vals.append((element,))
 			cons.add_satisfying_tuples(valid_vals)
 			course_planner_csp.add_constraint(cons)
 	
-	# Add constraints for prereqs
+	# Add constraints for prereqs and co-reqs
 	for course in courses:
 		prereqs = cdat[course][0]
+		coreqs = cdat[course][1]
 		dom = cdat[course][2]
 		c_var = find_var(course)
 		if len(prereqs) > 0:
 			for prereq in prereqs:
+				if not prereq in courses:
+					print("You need to take " + prereq + " in order to take " + course)
+					exit()
+
 				p_var = find_var(prereq)
 				cons = Constraint("PreReq", [c_var, p_var])
 				######
@@ -46,8 +61,22 @@ def course_planner_csp(courses, summer, years):
 				cons.add_satisfying_tuples(valid_vals)			
 				######
 				course_planner_csp.add_constraint(cons)
-
-	# Add constraints for co-req
+		if len(coreqs) > 0:
+			for coreq in coreqs:
+				if not coreq in courses:
+					print("You need to take " + coreq + " with " + course)
+					exit()
+				co_var = find_var(coreq)
+				cons = Constraint("CoReq", [c_var, co_var])
+				######
+				valid_vals = []
+				for element in dom:
+					for section in cdat[coreq][2]:
+						if element[0][0] == section[0][0]:
+							valid_vals.append((element, section))
+				cons.add_satisfying_tuples(valid_vals)			
+				######
+				course_planner_csp.add_constraint(cons)
 	
 	# Add custom constraints
 	#TBD
