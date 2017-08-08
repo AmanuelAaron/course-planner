@@ -30,6 +30,3 @@ if __name__ == "__main__":
 	csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS)
 	solver = BT(csp)
 	solver.bt_search(prop_GAC)
-	
-	for var in var_array:
-		print(var.get_assigned_value())
