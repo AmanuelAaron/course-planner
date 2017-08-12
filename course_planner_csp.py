@@ -1,12 +1,12 @@
 from cspbase import *
 from course_database import *
-cdat = dat
 
 course_vars = []
 
-def course_planner_csp(courses, summer, years):
+def course_planner_csp(courses, summer, years, times, in_dat):
 	'''
 	'''
+	cdat = dict(in_dat)
 	# Create variables for each course and add it to the CSP
 
 	for course in courses:
@@ -14,6 +14,16 @@ def course_planner_csp(courses, summer, years):
 		course_vars.append(Variable(course, dom))
 	
 	course_planner_csp = CSP("course-planner", course_vars)
+	
+	# Add constraint for # of course per semester
+	cons = Constraint("5 Courses per Semester", course_vars)
+	cons.change_func(1)
+	course_planner_csp.add_constraint(cons)
+	
+	# Add constraint for time conlflicts
+	cons = Constraint("No time conflict", course_vars)
+	cons.change_func(2)
+	course_planner_csp.add_constraint(cons)
 	
 	# Add constraints for the total number of years
 	for var in course_vars:
@@ -38,7 +48,7 @@ def course_planner_csp(courses, summer, years):
 			cons.add_satisfying_tuples(valid_vals)
 			course_planner_csp.add_constraint(cons)
 	
-	# Add constraints for prereqs and co-reqs
+	# Add constraints for prereqs, co-reqs
 	for course in courses:
 		prereqs = cdat[course][0]
 		coreqs = cdat[course][1]
@@ -78,8 +88,17 @@ def course_planner_csp(courses, summer, years):
 				######
 				course_planner_csp.add_constraint(cons)
 	
-	# Add custom constraints
-	#TBD
+	# Add time constraints
+	for time in times:
+		for var in course_vars:
+			cons = Constraint("Custom", [var])
+			dom = cdat[var.name][2]
+			valid_vals = []
+			for element in dom:
+				if element[0][1] != time[0] or element[0][2] != time[1]:
+					valid_vals.append((element,))
+			cons.add_satisfying_tuples(valid_vals)
+			course_planner_csp.add_constraint(cons)
 	
 	return course_planner_csp, course_vars
 

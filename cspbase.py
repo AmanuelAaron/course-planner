@@ -1,5 +1,6 @@
 import time
 import functools
+from course_database import *
 
 '''Constraint Satisfaction Routines
    A) class Variable
@@ -228,7 +229,14 @@ class Constraint:
         #satisfying tuples that contain a particular variable/value
         #pair.
         self.sup_tuples = dict()
-
+        
+        #Special functions for checking(0 - normal, 1 -)
+        self.func = 0
+	
+    def change_func(self, func):
+        '''change the check function'''
+        self.func = func
+	
     def add_satisfying_tuples(self, tuples):
         '''We specify the constraint by adding its complete list of satisfying tuples.'''
         for x in tuples:
@@ -254,7 +262,25 @@ class Constraint:
            constraints "satisfies" function.  Note the list of values
            are must be ordered in the same order as the list of
            variables in the constraints scope'''
-        return tuple(vals) in self.sat_tuples
+        if self.func == 1:
+        	sem_count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        	for vals in vals:
+        		sem_count[val[0][0]] += 1
+        		if sem_count[val[0][0]] > 5:
+        			return False
+        	return True
+        elif self.func == 2:
+        	section_times = []
+        	for vals in vals:
+        		sec = str(sem_count[val[0][0]]) + sem_count[val[0][1]] + sem_count[val[0][2]]
+        		print(section_times)
+        		if sec in section_times:
+        			return False
+        		else:
+        			section_times.append(sec)
+        	return True
+        else:	
+        	return tuple(vals) in self.sat_tuples
 
     def get_n_unasgn(self):
         '''return the number of unassigned variables in the constraint's scope'''
@@ -278,6 +304,22 @@ class Constraint:
            of assignments satisfying the constraint where each value is
            still in the corresponding variables current domain
         '''
+        if self.func == 1:
+        	return True
+        if self.func == 2:
+        	other_courses = self.scope[:]
+        	for ovar in other_courses:
+        		if ovar.name == var.name:
+        			other_courses.remove(ovar) 
+        	
+        	for course in other_courses:
+        		same_sem = []
+        		for v in dat[course.name][2]:
+        			if course.in_cur_domain(v) and v[0][0] == val[0][0]:
+        				same_sem.append(v);
+        		if val in same_sem:
+        			return False
+        	return True
         if (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:
                 if self.tuple_is_valid(t):
@@ -478,21 +520,26 @@ class BT:
             print("Root Prunings: ", prunings)
 
         if status == False:
-            print("CSP{} detected contradiction at root".format(
-                self.csp.name))
+            #print("CSP{} detected contradiction at root".format(
+            #    self.csp.name))
+            print("done")
         else:
             status = self.bt_recurse(propagator, var_ord, val_ord, 1)   #now do recursive search
 
         self.restoreValues(prunings)
         if status == False:
-            print("CSP{} unsolved. Has no solutions".format(self.csp.name))
+            #print("CSP{} unsolved. Has no solutions".format(self.csp.name))
+            return None
         if status == True:
-            print("CSP {} solved. CPU Time used = {}".format(self.csp.name,
-                                                             time.process_time() - stime))
-            self.csp.print_soln()
-
-        print("bt_search finished")
-        self.print_stats()
+            # print("CSP {} solved. CPU Time used = {}".format(self.csp.name,
+            #                                                  time.process_time() - stime))
+            # self.csp.print_soln()
+            soln = dict()
+            for v in self.csp.vars:
+                soln[v.name] = v.get_assigned_value()
+            return soln
+        #print("bt_search finished")
+        #self.print_stats()
 
     def bt_recurse(self, propagator, var_ord, val_ord, level):
         '''Return true if found solution. False if still need to search.

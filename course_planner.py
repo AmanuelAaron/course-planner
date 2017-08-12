@@ -1,4 +1,4 @@
-import course_database
+from course_database import *
 from course_planner_csp import *
 from propagators import *
 from orderings import *
@@ -6,6 +6,8 @@ from orderings import *
 COURSES = []
 SUMMER = False
 YEARS = 0
+UNAVBL = []
+curr_dat = dat
 
 if __name__ == "__main__":
 	yrs = input("How many long do you plan on going to school(years):")
@@ -22,11 +24,41 @@ if __name__ == "__main__":
 	inp = ""
 	while(inp != 'done'):
 		inp = input("")
-		if (inp in course_database.dat.keys()):
-			COURSES.append(inp)
+		if (inp in dat.keys()):
+			if inp in COURSES:
+				print("You have already entered this course")
+			elif set(dat[inp][3]).intersection(set(COURSES)) != set():
+				print("You cannot take " + inp + " with any of these courses:")
+				print(dat[inp][3])
+			else:
+				COURSES.append(inp)
 		elif(inp != 'done'):
 			print("Course not in database")
+		elif inp == 'done':
+			if len(COURSES) < 2:
+				print("Too few courses. Please add more")
+				inp = ""
 	
-	csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS)
-	solver = BT(csp)
-	solver.bt_search(prop_GAC)
+	print("What times are you unavailable Enter 'done' when finished:")
+	print("(FORMAT : M,T,W,J,F = Mon, Tues, Wed, Thur, Fri")
+	print("		M,D,E,N = Morning, Day, Evening, Night")
+	print(" Example: I am unavailble Monday Morning -> 'MM')")
+	inp = ""
+	while(inp != 'done'):
+		inp = input("")
+		if (inp[0] in ["M", "T", "W", "J", "F"] and inp[1] in ["M","D","E","N"]):
+			UNAVBL.append(inp)
+		elif(inp != 'done'):
+			print("invalid input")
+	
+	soln = dict()
+	while soln != None:
+		csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS, UNAVBL, curr_dat)
+		solver = BT(csp)
+		soln = solver.bt_search(prop_GAC)
+		if soln != None:
+			print(soln)
+			for course in soln.keys():
+				curr_dat[course][2].remove(soln[course])
+		
+		
