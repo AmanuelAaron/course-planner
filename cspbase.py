@@ -161,9 +161,16 @@ class Variable:
            reverse it on unassign'''
 
         if self.is_assigned() or not self.in_cur_domain(value):
-            print("ERROR: trying to assign variable", self, 
+        	if self.is_assigned():
+        		print("Assigned Value")
+        		print(self.assignedValue)
+        	else:
+        		print("Tried to assign")
+        		print(value)
+        	
+        	print("ERROR: trying to assign variable", self, 
                   "that is already assigned or illegal value (not in curdom)")
-            return
+        	return
 
         self.assignedValue = value
 
@@ -307,6 +314,7 @@ class Constraint:
         if self.func == 1:
         	return True
         if self.func == 2:
+        	format_database()
         	other_courses = self.scope[:]
         	for ovar in other_courses:
         		if ovar.name == var.name:
@@ -522,7 +530,7 @@ class BT:
         if status == False:
             #print("CSP{} detected contradiction at root".format(
             #    self.csp.name))
-            print("done")
+            pass
         else:
             status = self.bt_recurse(propagator, var_ord, val_ord, 1)   #now do recursive search
 

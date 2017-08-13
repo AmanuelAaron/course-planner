@@ -10,8 +10,22 @@ YEARS = 0
 UNAVBL = []
 PREF_TIME = []
 PROF_PREF = 1
+format_database()
 curr_dat = dat
 SOL = []
+
+def find_sols(courses, summer, years, unavbl, c_dat):
+	sols = []
+	soln = dict()
+	while soln != None:
+		csp, var_array = course_planner_csp(courses, summer, years, unavbl, c_dat)
+		solver = BT(csp)
+		soln = solver.bt_search(prop_GAC)
+		if soln != None:
+			sols.append(soln)
+			for course in soln.keys():
+				curr_dat[course][2].remove(soln[course])
+	return sols
 
 if __name__ == "__main__":
 	yrs = input("How many long do you plan on going to school(years):")
@@ -54,6 +68,7 @@ if __name__ == "__main__":
 			UNAVBL.append(inp)
 		elif(inp != 'done'):
 			print("invalid input")
+	print("")
 	print("What are your preferred timeslots? Enter 'done' when finished:")
 	print("(FORMAT : M,T,W,J,F = Mon, Tues, Wed, Thur, Fri")
 	print("		M,D,E,N = Morning, Day, Evening, Night")
