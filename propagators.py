@@ -125,3 +125,37 @@ def prop_GAC(csp, newVar=None):
     			    			GACQueue.append(con)
     return True, pruned_vals
 
+#Slightly modified version of GAC prop that chooses next variable to expand based on heuristic function
+#instead of looping for the next one
+#Originaly used for old heuristic function in orderings
+def prop_GAC_2(csp, newVar=None):
+    '''Do GAC propagation. If newVar is None we do initial GAC enforce
+       processing all constraints. Otherwise we do GAC enforce with
+       constraints containing newVar on GAC Queue'''
+    # IMPLEMENT
+    pruned_vals = []
+    if newVar is None:
+        GACQueue = csp.get_all_cons()
+    else:
+        GACQueue = csp.get_cons_with_var(newVar)
+
+    while GACQueue != []:
+        c = GACQueue.pop(0)
+        temp = c.get_scope()
+        while len(temp) != 0:
+            v = ord_weighted(temp)
+            temp.remove(v)
+            for d in v.cur_domain():
+                if not c.has_support(v, d):
+                    v.prune_value(d)
+                    pruned_vals.append((v, d))
+                    if v.cur_domain_size() == 0:
+                        return False, pruned_vals
+                    else:
+                        other_cons = csp.get_cons_with_var(v)
+                        other_cons.remove(c)
+                        for con in other_cons:
+                            if con not in GACQueue:
+                                GACQueue.append(con)
+    return True, pruned_vals
+
