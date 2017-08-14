@@ -21,5 +21,4 @@ def get_best_solution(list_of_sol, pref_time, prof_pref):
         elif h_value < current:
             best_sol = sol
             current = h_value
-        print(h_value)
     return best_sol

@@ -6,7 +6,7 @@ course_vars = []
 def course_planner_csp(courses, summer, years, times, in_dat):
 	'''
 	'''
-	cdat = dict(in_dat)
+	cdat = in_dat.copy()
 	# Create variables for each course and add it to the CSP
 
 	for course in courses:

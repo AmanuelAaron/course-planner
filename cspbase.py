@@ -2,6 +2,8 @@ import time
 import functools
 from course_database import *
 
+format_database()
+
 '''Constraint Satisfaction Routines
    A) class Variable
 
@@ -314,7 +316,6 @@ class Constraint:
         if self.func == 1:
         	return True
         if self.func == 2:
-        	format_database()
         	other_courses = self.scope[:]
         	for ovar in other_courses:
         		if ovar.name == var.name:

@@ -4,7 +4,11 @@ FORMAT
 '''
 def format_database():
 	for course in dat.keys():
-		dat[course][2] = list(set(dat[course][2]))
+		l = []
+		for section in dat[course][2]:
+			 if not (section in l):
+			 	l.append(section)
+		dat[course][2] = l[:]
 
 # prof rating (out of 6)
 prof_rat = {"Alice" : 6, "Bob" : 5, "Chris" : 4, "Dave" : 3, "Ellen": 2, "Frank" : 1, "Georgia" : 0}

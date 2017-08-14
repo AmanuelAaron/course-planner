@@ -3,6 +3,7 @@ from course_planner_csp import *
 from propagators import *
 from orderings import *
 from filter import *
+import time
 
 COURSES = []
 SUMMER = False
@@ -11,20 +12,22 @@ UNAVBL = []
 PREF_TIME = []
 PROF_PREF = 1
 format_database()
-curr_dat = dat
+CURR_DAT = dat.copy()
 SOL = []
+PROP = prop_GAC
 
 def find_sols(courses, summer, years, unavbl, c_dat):
+	
 	sols = []
 	soln = dict()
 	while soln != None:
 		csp, var_array = course_planner_csp(courses, summer, years, unavbl, c_dat)
 		solver = BT(csp)
-		soln = solver.bt_search(prop_GAC)
+		soln = solver.bt_search(PROP)
 		if soln != None:
 			sols.append(soln)
 			for course in soln.keys():
-				curr_dat[course][2].remove(soln[course])
+				c_dat[course][2].remove(soln[course])
 	return sols
 
 if __name__ == "__main__":
@@ -56,7 +59,8 @@ if __name__ == "__main__":
 			if len(COURSES) < 2:
 				print("Too few courses. Please add more")
 				inp = ""
-	
+
+	print("")
 	print("What times are you unavailable Enter 'done' when finished:")
 	print("(FORMAT : M,T,W,J,F = Mon, Tues, Wed, Thur, Fri")
 	print("		M,D,E,N = Morning, Day, Evening, Night")
@@ -68,6 +72,7 @@ if __name__ == "__main__":
 			UNAVBL.append(inp)
 		elif(inp != 'done'):
 			print("invalid input")
+
 	print("")
 	print("What are your preferred timeslots? Enter 'done' when finished:")
 	print("(FORMAT : M,T,W,J,F = Mon, Tues, Wed, Thur, Fri")
@@ -80,20 +85,25 @@ if __name__ == "__main__":
 			PREF_TIME.append(inp2)
 		elif(inp2 != 'done'):
 			print("invalid input")
+	print("")
 	PROF_PREF = input("Rate the importance of the quality of professors from 1-5\n1 being not important and 5 being very important: ")
 	PROF_PREF = int(PROF_PREF)
 	soln = dict()
+	s_time = time.process_time()
 	while soln != None:
-		csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS, UNAVBL, curr_dat)
+		csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS, UNAVBL, CURR_DAT)
 		solver = BT(csp)
-		soln = solver.bt_search(prop_GAC)
+		soln = solver.bt_search(PROP)
 		if soln != None:
-			print(soln)
 			SOL.append(soln)
 			for course in soln.keys():
-				curr_dat[course][2].remove(soln[course])
+				CURR_DAT[course][2].remove(soln[course])
+	f_time = time.process_time()
+	t_time = f_time - s_time
+	print("# of Solutions Found: " + str(len(SOL)))
+	print("CPU time used: " + str(t_time))
 	sol = get_best_solution(SOL, PREF_TIME, PROF_PREF)
-	print("best solution\n")
+	print("Your best solution is: ")
 	print(sol)
 
 		
