@@ -159,3 +159,38 @@ def prop_GAC_2(csp, newVar=None):
                                 GACQueue.append(con)
     return True, pruned_vals
 
+def prop_GAC_3(csp, newVar=None):
+    '''Do GAC propagation. If newVar is None we do initial GAC enforce 
+       processing all constraints. Otherwise we do GAC enforce with
+       constraints containing newVar on GAC Queue'''
+#IMPLEMENT
+    pruned = []
+    check_again = []
+    check_again_constraints = []
+    c_queue = Queue()
+    if not newVar:
+        temp = csp.get_all_cons()
+    else:
+        temp = csp.get_cons_with_var(newVar)
+    for c in temp:
+        c_queue.enqueue(c)
+    while c_queue.size() > 0:
+        temp = c_queue.dequeue()
+        check_again_constraints.append(temp)
+        for var in temp.get_unasgn_vars():
+            for value in var.cur_domain():
+                if not temp.has_support(var, value):
+                    var.prune_value(value)
+                    if (var, value) not in pruned:
+                        pruned.append((var, value))
+                    if var not in check_again:
+                        check_again.append(var)
+            if var.cur_domain_size() == 0:
+                return False, pruned
+        for constraint in check_again_constraints:
+            for item in constraint.get_unasgn_vars():
+                if item in check_again:
+                    c_queue.enqueue(constraint)
+                    break
+        check_again = []
+    return True, pruned
