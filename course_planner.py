@@ -14,7 +14,7 @@ PROF_PREF = 1
 format_database()
 CURR_DAT = dat.copy()
 SOL = []
-PROP = prop_GAC
+PROP = prop_FC
 
 def find_sols(courses, summer, years, unavbl, c_dat):
 	
@@ -29,6 +29,12 @@ def find_sols(courses, summer, years, unavbl, c_dat):
 			for course in soln.keys():
 				c_dat[course][2].remove(soln[course])
 	return sols
+
+def one_sol(courses, summer, years, unavbl, c_dat):
+	csp, var_array = course_planner_csp(courses, summer, years, unavbl, c_dat)
+	solver = BT(csp)
+	soln = solver.bt_search(PROP)
+	return soln != None
 
 if __name__ == "__main__":
 	yrs = input("How many long do you plan on going to school(years):")
@@ -92,12 +98,16 @@ if __name__ == "__main__":
 	s_time = time.process_time()
 	while soln != None:
 		csp, var_array = course_planner_csp(COURSES, SUMMER, YEARS, UNAVBL, CURR_DAT)
+		if csp == None:
+			break
 		solver = BT(csp)
 		soln = solver.bt_search(PROP)
 		if soln != None:
 			SOL.append(soln)
 			for course in soln.keys():
 				CURR_DAT[course][2].remove(soln[course])
+		if float(time.process_time() - s_time) > 8:
+			break
 	f_time = time.process_time()
 	t_time = f_time - s_time
 	print("# of Solutions Found: " + str(len(SOL)))

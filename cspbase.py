@@ -273,16 +273,15 @@ class Constraint:
            variables in the constraints scope'''
         if self.func == 1:
         	sem_count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        	for vals in vals:
+        	for val in vals:
         		sem_count[val[0][0]] += 1
         		if sem_count[val[0][0]] > 5:
         			return False
         	return True
         elif self.func == 2:
         	section_times = []
-        	for vals in vals:
-        		sec = str(sem_count[val[0][0]]) + sem_count[val[0][1]] + sem_count[val[0][2]]
-        		print(section_times)
+        	for val in vals:
+        		sec = str(val[0][0]) + val[0][1] + val[0][2]
         		if sec in section_times:
         			return False
         		else:

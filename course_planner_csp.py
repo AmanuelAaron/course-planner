@@ -11,6 +11,8 @@ def course_planner_csp(courses, summer, years, times, in_dat):
 
 	for course in courses:
 		dom = cdat[course][2]
+		if len(dom) == 0:
+			return None
 		course_vars.append(Variable(course, dom))
 	
 	course_planner_csp = CSP("course-planner", course_vars)
