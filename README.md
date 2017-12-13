@@ -1,4 +1,6 @@
 # course-planner
+# Description
+Creates a schedule for a student taking Computer Science courses at UofT
 
 # Format of the each element in a Variable's domain(tuple)
 	(SEMESTER(int), DAY(str), TIME(str), PROF(str))
